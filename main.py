@@ -18,6 +18,9 @@ activationWord = 'computer'
 chrome_path = "/Applications/Google Chrome.app"
 webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
 
+# wolfram alpha client
+appId = 'K9HG67-HRKL6ELGH7'
+wolframClient = wolframalpha.Client(appId)
 
 def speak(text, rate=120):
     engine.setProperty('rate', rate)
@@ -57,6 +60,37 @@ def search_wikipedia(query = ''):
     wikiSummary = str(wikiPage.summary)
     return wikiSummary
 
+def listOrDict(var):
+    if isinstance(var, list):
+        return var[0]['plaintext']
+    else:
+        return var['plaintext']
+
+def search_wolframAlpha(query = ''):
+    response = wolframClient.query(query)
+
+    if response['@success'] == 'false':
+        return 'could not compute'
+
+    # query resolved
+    else:
+        result = ''
+        # question
+        pod0 = response['pod'][0]
+        pod1 = response['pod'][1]
+        # may contain the answer, has the highest confidence value
+        # if it's primary, or has the title of result or definition, then it's the official result
+        if ('result' in pod1['@title'].lower()) or (pod1.get('@primary', 'false') == 'true') or ('definition' in pod1['@title'].lower()):
+            result = listOrDict(pod1['sub-pod'])
+            # remove the bracketed section
+            return result.split('(')[0]
+        else:
+            question = listOrDict(pod0['sub-pod'])
+            return question.split('(')[0]
+            # search wikipedia instead
+            speak('computation failed, querying universal databank')
+            return search_wikipedia(question)
+
 
 # main loop
 
@@ -90,3 +124,14 @@ if __name__ == '__main__':
                 query = ' '.join(query[1:])
                 speak('Querying the universal databank.')
                 speak(search_wikipedia(query))
+
+            # wolfram Alpha
+            if query[0] == 'compute' or query[0] == 'computer':
+                query = ' '.join(query[1:])
+                speak('Computing')
+
+                try:
+                    search_wolframAlpha(query)
+                    speak(result)
+                except:
+                    speak('unable to compute')
