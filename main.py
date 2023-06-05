@@ -13,6 +13,11 @@ voices = engine.getProperty('voices')
 engine.setProperty('voice', 'voice[0].id')  # 0 = male, 1 = female
 activationWord = 'computer'
 
+# browser configuration
+# setting the path
+chrome_path = "/Applications/Google Chrome.app"
+webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
+
 
 def speak(text, rate=120):
     engine.setProperty('rate', rate)
@@ -52,13 +57,17 @@ if __name__ == '__main__':
         if query[0] == activationWord:
             query.pop(0)
 
-            #list commands
+            # list commands
             if query[0] == 'say':
                 if 'hello' in query:
                     speak('Greetings, all! ')
                 else:
-                    query.pop(0) #remove say
+                    query.pop(0)  # remove say
                     speech = ' '.join(query)
                     speak(speech)
 
-
+            # web navigation
+            if query[0] == 'go' and query[1] == 'to' :
+                speak('Opening...')
+                query = ' '.join(query[2:])
+                webbrowser.get('chrome').open_new(query)
