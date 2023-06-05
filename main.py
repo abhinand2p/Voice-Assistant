@@ -1,10 +1,10 @@
 import speech_recognition as sr
+from logging.config import listen
 import pyttsx3
-import datetime
+from datetime import datetime
 import wikipedia
 import webbrowser
 import wolframalpha
-
 
 # speech recognition initialization
 
@@ -14,7 +14,13 @@ engine.setProperty('voice', 'voice[0].id')  # 0 = male, 1 = female
 activationWord = 'computer'
 
 
-def parseCommand() :
+def speak(text, rate=120):
+    engine.setProperty('rate', rate)
+    engine.say(text)
+    engine.runAndWait()
+
+
+def parseCommand():
     listener = sr.Recognizer()
     print("listening for command")
 
@@ -28,7 +34,31 @@ def parseCommand() :
         print(f'the input speech was: {query}')
     except Exception as exception:
         print('i did not quite catch that')
-
+        speak('I did not quite catch that')
         print(exception)
         return 'None'
     return query
+
+
+# main loop
+
+if __name__ == '__main__':
+    speak('All systems nominal.', 120)
+
+    while True:
+        # parsing as list
+        query = parseCommand().lower().split()
+
+        if query[0] == activationWord:
+            query.pop(0)
+
+            #list commands
+            if query[0] == 'say':
+                if 'hello' in query:
+                    speak('Greetings, all! ')
+                else:
+                    query.pop(0) #remove say
+                    speech = ' '.join(query)
+                    speak(speech)
+
+
