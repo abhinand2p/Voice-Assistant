@@ -44,6 +44,19 @@ def parseCommand():
         return 'None'
     return query
 
+def search_wikipedia(query = ''):
+    searchResults = wikipedia.search(query)
+    if not searchResults:
+        print('No wikipedia results')
+        return 'No results received'
+    try:
+        wikiPage = wikipedia.page(searchResults[0])
+    except wikipedia.DisambiguationError as error:
+        wikiPage = wikipedia.page(error.options[0])
+    print(wikiPage.title)
+    wikiSummary = str(wikiPage.summary)
+    return wikiSummary
+
 
 # main loop
 
@@ -71,3 +84,9 @@ if __name__ == '__main__':
                 speak('Opening...')
                 query = ' '.join(query[2:])
                 webbrowser.get('chrome').open_new(query)
+
+            # wikipedia
+            if query[0] == 'wikipedia':
+                query = ' '.join(query[1:])
+                speak('Querying the universal databank.')
+                speak(search_wikipedia(query))
